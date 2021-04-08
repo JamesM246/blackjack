@@ -72,46 +72,62 @@ def get_bet():
     return int(user_in)
 
 
-def check_bust(total):
-    return total > 21
-
-
-def check_win(total):
-    if total <= 21:
-        return True
+def dealer_turn():
+    total = dealer.hand_total()
+    print(f"\nDealer's cards: {dealer.print_hand()}")
+    if total > 21:
+        print('Dealer bust!')
+    elif total < DEALER_STICK:
+        print('Dealer draws...')
+        dealer.draw()
+        return dealer_turn()
+    else:
+        print('Dealer sticks.')
+    return total
 
 
 def hit_stick():
-    print(f'Your cards: {player.print_hand()}')
-    print(f'Card total: {player.hand_total()}')
-    if check_bust(player.hand_total()):
+    total = player.hand_total()
+    print(f'\nYour cards: {player.print_hand()}')
+    print(f'Card total: {total}')
+    if total > 21:
         print('Bust!')
-        return False
-    if player.hand_total() == 21:
-        return True
+        return total
+    print(f"Dealer's card: {str(dealer.hand[0])}")
     user_in = input('Hit or Stick? (h/s): ')
     if user_in == 'h':
         player.draw()
         return hit_stick()
     elif user_in == 's':
-        return check_win(player.hand_total())
+        return total
     else:
         print('Invalid input.')
         hit_stick()
 
 
 def play():
-    print(f"Your balance: {player.balance}")
+    print(f"\nYour balance: {player.balance}")
     bet = get_bet()
     player.draw()
+    dealer.draw()
     player.draw()
-    if hit_stick():
+    dealer.draw()
+    player_result = hit_stick()
+    print('-' * 30)
+    dealer_result = dealer_turn()
+    print(f'\nYour cards: {player.print_hand()} | total = {player_result}')
+    print(f"Dealer's cards: {dealer.print_hand()} | total = {dealer_result}\n")
+    if player_result <= 21 < dealer_result or dealer_result < player_result <= 21:
         print('You win!')
         player.balance += bet
+        print(f'+ {bet}')
+    elif dealer_result == player_result or dealer_result > 22 < player_result:
+        print("It's a tie!")
     else:
         print('You lose.')
         player.balance -= bet
-    user_in = input('Play again? (y/n)')
+        print(f'- {bet}')
+    user_in = input('\nPlay again? (y/n): ')
     if user_in == 'y':
         player.clear_hand()
         dealer.clear_hand()
@@ -123,6 +139,7 @@ def play():
 
 
 if __name__ == '__main__':
+    DEALER_STICK = 18
     player = Player('player')
     dealer = Hand()
     d = Deck()
