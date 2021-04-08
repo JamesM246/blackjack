@@ -64,6 +64,25 @@ class Player(Hand):
         self.balance = balance
 
 
+def read_accounts_file():
+    users = {}
+    with open('accounts.txt', mode='r') as file_read:
+        for line in file_read:
+            item = line.split()
+            users[item[0]] = item[1]
+    return users
+
+
+def write_accounts_file():
+    with open('accounts.txt', mode='w') as file_write:
+        for k, v in accounts.items():
+            file_write.write(k + ' ' + v)
+
+
+def update_player_account():
+    accounts[player.name] = str(player.balance)
+
+
 def get_bet():
     user_in = int(input('Enter bet amount: '))
     if user_in > player.balance:
@@ -132,15 +151,22 @@ def play():
         player.clear_hand()
         dealer.clear_hand()
         global d
-        d = Deck()
+        d = Deck()    # Resetting deck by creating new object - is this bad practice?
         play()
     elif user_in == 'n':
         return
 
 
+DEALER_STICK = 18   # The lowest value that the dealer will 'stick' at
+
+
 if __name__ == '__main__':
-    DEALER_STICK = 18
-    player = Player('player')
+    accounts = read_accounts_file()
+    # select_account()
+    # login()
+    player = Player('test', int(accounts['test']))
     dealer = Hand()
     d = Deck()
     play()
+    update_player_account()
+    write_accounts_file()
