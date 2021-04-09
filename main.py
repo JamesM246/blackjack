@@ -90,9 +90,9 @@ def update_player_account():
 
 
 def select_account():
-    print('Accounts:')
+    print('Account Name' + ' '*10 + 'Balance')
     for account in accounts:
-        print(account)
+        print(f'{account.ljust(20)} | {accounts[account]}')
     return input('Enter account name: ')
 
 
@@ -104,6 +104,7 @@ def login(name='test'):
 
 
 def get_bet():
+    print(f"\nYour balance: {player.balance}")
     user_in = int(input('Enter bet amount: '))
     if user_in > player.balance:
         print('Invalid input.')
@@ -148,7 +149,10 @@ def hit_stick():
 
 
 def play():
-    print(f"\nYour balance: {player.balance}")
+    if player.balance == 0:
+        print("You're out of money!")
+        print('GAME OVER')
+        return
     bet = get_bet()
     player.draw()
     dealer.draw()
@@ -169,15 +173,19 @@ def play():
         print('You lose.')
         player.balance -= bet
         print(f'- {bet}')
-    user_in = input('\nPlay again? (y/n): ')
-    if user_in == 'y':
-        player.clear_hand()
-        dealer.clear_hand()
-        global deck
-        deck = Deck()    # Resetting deck by creating new object - is this bad practice?
-        play()
-    elif user_in == 'n':
-        return
+    while True:
+        user_in = input('\nPlay again? (y/n): ')
+        if user_in == 'y':
+            player.clear_hand()
+            dealer.clear_hand()
+            global deck
+            deck = Deck()    # Resetting deck by creating new object - is this bad practice?
+            play()
+            break
+        elif user_in == 'n':
+            return
+        else:
+            print('Invalid input.')
 
 
 DEALER_STICK = 18   # The lowest value that the dealer will 'stick' at
