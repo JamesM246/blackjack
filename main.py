@@ -45,7 +45,7 @@ class Hand:
         self.hand = []
 
     def draw(self):
-        self.hand.append(d.draw())
+        self.hand.append(deck.draw())
 
     def hand_values(self):
         return list(map(lambda card: card.value, self.hand ))
@@ -66,21 +66,41 @@ class Player(Hand):
 
 def read_accounts_file():
     users = {}
-    with open('accounts.txt', mode='r') as file_read:
-        for line in file_read:
-            item = line.split()
-            users[item[0]] = item[1]
-    return users
+    try:
+        with open('accounts.txt', mode='r') as file_read:
+            for line in file_read:
+                item = line.split()
+                users[item[0]] = item[1]
+    except FileNotFoundError:
+        print('Error: file not found')
+        return None
+    finally:
+        return users
 
 
 def write_accounts_file():
     with open('accounts.txt', mode='w') as file_write:
         for k, v in accounts.items():
-            file_write.write(k + ' ' + v)
+            file_write.write(k + ' ' + v + '\n')
 
 
 def update_player_account():
     accounts[player.name] = str(player.balance)
+    print('Account updated')
+
+
+def select_account():
+    print('Accounts:')
+    for account in accounts:
+        print(account)
+    return input('Enter account name: ')
+
+
+def login(name='test'):
+    if accounts is None or name not in accounts:
+        accounts[name] = 1000
+        return Player(name)
+    return Player(name, int(accounts[name]))
 
 
 def get_bet():
@@ -112,6 +132,9 @@ def hit_stick():
     if total > 21:
         print('Bust!')
         return total
+    if total == 21:
+        print('Blackjack!')
+        return total
     print(f"Dealer's card: {str(dealer.hand[0])}")
     user_in = input('Hit or Stick? (h/s): ')
     if user_in == 'h':
@@ -121,7 +144,7 @@ def hit_stick():
         return total
     else:
         print('Invalid input.')
-        hit_stick()
+        return hit_stick()
 
 
 def play():
@@ -132,7 +155,7 @@ def play():
     player.draw()
     dealer.draw()
     player_result = hit_stick()
-    print('-' * 30)
+    print('-' * 40)
     dealer_result = dealer_turn()
     print(f'\nYour cards: {player.print_hand()} | total = {player_result}')
     print(f"Dealer's cards: {dealer.print_hand()} | total = {dealer_result}\n")
@@ -150,8 +173,8 @@ def play():
     if user_in == 'y':
         player.clear_hand()
         dealer.clear_hand()
-        global d
-        d = Deck()    # Resetting deck by creating new object - is this bad practice?
+        global deck
+        deck = Deck()    # Resetting deck by creating new object - is this bad practice?
         play()
     elif user_in == 'n':
         return
@@ -162,11 +185,9 @@ DEALER_STICK = 18   # The lowest value that the dealer will 'stick' at
 
 if __name__ == '__main__':
     accounts = read_accounts_file()
-    # select_account()
-    # login()
-    player = Player('test', int(accounts['test']))
+    player = login(select_account())
     dealer = Hand()
-    d = Deck()
+    deck = Deck()
     play()
     update_player_account()
     write_accounts_file()
