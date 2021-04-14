@@ -48,7 +48,7 @@ class Hand:
         self.hand.append(deck.draw())
 
     def hand_values(self):
-        return list(map(lambda card: card.value, self.hand ))
+        return list(map(lambda card: card.value, self.hand))
 
     def hand_total(self):
         total = sum(map(lambda card: card.get_int_value(), self.hand))
@@ -64,22 +64,22 @@ class Player(Hand):
         self.balance = balance
 
 
-def read_accounts_file():
+def read_accounts_file(file):
     users = {}
     try:
-        with open('accounts.txt', mode='r') as file_read:
+        with open(file, mode='r') as file_read:
             for line in file_read:
                 item = line.split()
                 users[item[0]] = item[1]
     except FileNotFoundError:
         print('Error: file not found')
-        return None
+        return {}
     finally:
         return users
 
 
-def write_accounts_file():
-    with open('accounts.txt', mode='w') as file_write:
+def write_accounts_file(file):
+    with open(file, mode='w') as file_write:
         for k, v in accounts.items():
             file_write.write(k + ' ' + v + '\n')
 
@@ -93,11 +93,11 @@ def select_account():
     print('Account Name' + ' '*10 + 'Balance')
     for account in accounts:
         print(f'{account.ljust(20)} | {accounts[account]}')
-    return input('Enter account name: ')
+    return input('\nEnter account name: ')
 
 
 def login(name='test'):
-    if accounts is None or name not in accounts:
+    if name not in accounts:
         accounts[name] = 1000
         return Player(name)
     return Player(name, int(accounts[name]))
@@ -136,7 +136,7 @@ def hit_stick():
     if total == 21:
         print('Blackjack!')
         return total
-    print(f"Dealer's card: {str(dealer.hand[0])}")
+    print(f"Dealer's card: {dealer.hand[0]}")
     user_in = input('Hit or Stick? (h/s): ')
     if user_in == 'h':
         player.draw()
@@ -189,13 +189,13 @@ def play():
 
 
 DEALER_STICK = 18   # The lowest value that the dealer will 'stick' at
-
+SAVE_FILE = 'accounts.txt'
 
 if __name__ == '__main__':
-    accounts = read_accounts_file()
+    accounts = read_accounts_file(SAVE_FILE)
     player = login(select_account())
     dealer = Hand()
     deck = Deck()
     play()
     update_player_account()
-    write_accounts_file()
+    write_accounts_file(SAVE_FILE)
